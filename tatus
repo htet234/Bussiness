@@ -1,0 +1,62 @@
+[33m9d26343[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mHbudget[m[33m, [m[1;31morigin/Hbudget[m[33m)[m All done
+[33mc28a227[m Update add_data.html
+[33m1cc435d[m Update app.py
+[33m22cd136[m Merge pull request #16 from wine-lgtm/Hbudget
+[33m0a02264[m Budget Backend Finished
+[33mfa94c6d[m Merge pull request #15 from wine-lgtm/Hbudget
+[33m262aba3[m Entry accepted
+[33md31140f[m Update main.py
+[33m84cb117[m Update requirements.txt
+[33md4ea02a[m Update init_db.py
+[33mc9e9945[m Update newscript.js
+[33m83ea406[m Update app.py
+[33m0794313[m Merge pull request #13 from wine-lgtm/Hbudget
+[33m9afaac0[m Resolve merge conflict by ignoring .pyc files
+[33m4d33ed2[m Key Insights Function
+[33m24cc8e8[m Update app.py
+[33me684422[m Update add_data.html
+[33m100c28d[m Changed in report (main.py and newscript)
+[33m7f7a501[m Merge pull request #12 from wine-lgtm/Hbudget
+[33m52ec007[m Track last year records
+[33m1fe1a82[m Merge pull request #11 from wine-lgtm/Hbudget
+[33m9b76ea2[m Actual spent , budget comparison
+[33m8e689bf[m Merge pull request #10 from wine-lgtm/Hbudget
+[33m70c4930[m Sales Record actual spent connection
+[33me380dac[m Merge pull request #9 from wine-lgtm/Hbudget
+[33mdcbd81a[m Budget Dashboard started
+[33m3f15999[m log file
+[33m3b4836f[m Merge pull request #8 from wine-lgtm/Hbudget
+[33mc81c59f[m Verify
+[33m9a5baa6[m t push origin Hbudget Merge branch 'master' into Hbudget
+[33m71e80d0[m Stop tracking pg.log and ignore it
+[33m03197bc[m[33m ([m[1;32mmaster[m[33m)[m Stop tracking pg.log (log file)
+[33m1082e78[m Budget page splited
+[33m1a2240e[m Update app.py
+[33mc71c987[m Merge pull request #7 from wine-lgtm/Hbudget
+[33me8860ba[m Budget forms completed
+[33m7a3ad41[m Merge pull request #6 from wine-lgtm/Hbudget
+[33m99eb358[m Overall budget form limitation finished
+[33meedf95f[m Merge pull request #5 from wine-lgtm/Hbudget
+[33m1cdc61d[m Save Function work
+[33m2a2869a[m Merge pull request #4 from wine-lgtm/Hbudget
+[33m687e773[m Overall_budget form starts
+[33mc7172db[m Merge pull request #3 from wine-lgtm/Hbudget
+[33me3ec029[m Category budget form finished
+[33mf0e12d5[m Merge pull request #2 from wine-lgtm/Hbudget
+[33m94762f4[m Category Budget record save
+[33ma8d117c[m Merge pull request #1 from wine-lgtm/Hbudget
+[33m0708030[m Budget Form
+[33m0137e9f[m Update requirements.txt
+[33m1cebf0a[m Add files via upload
+[33m733255b[m Update newscript.js
+[33m5cb1bf0[m Update app.py
+[33mca0210d[m Update add_data.html
+[33mbe24d70[m Add setup
+[33ma7c3a23[m Delete checking_account_main.csv
+[33m48e5124[m Update newscript.js
+[33m272698d[m Update index.html
+[33mccfcdc1[m Update add_data.html
+[33m402865b[m Update app.py
+[33mcd14812[m add database file
+[33m954e811[m Test
+[33mcaed422[m Initial Commit

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Cashflow - Submission System</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="side.css">
+</head>
+
+<body>
+    
+    <div class="overlay"></div>
+
+    <div id="login-section" class="auth-container">
+        <div class="premium-login-box">
+            <div class="login-visual">
+                <div class="visual-content">
+                    <span class="brand-badge">Professional Edition</span>
+                    <h2>Brewing Financial Clarity.</h2>
+                    <p>Admin: owner@coffee.com / admin123<br>Sale: sale@coffee.com / sale123</p>
+                </div>
+            </div>
+         
+            <div class="login-form-area">
+                <div class="form-inner">
+                    <div class="logo-area">
+                        <div class="coffee-icon">☕</div>
+                        <h1>System Login</h1>
+                        <p>Enter your credentials to continue</p>
+                    </div>
+                    <form id="loginForm">
+                        <div class="form-group-premium">
+                            <label>Email Address</label>
+                            <div class="input-wrapper">
+                                <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                            </div>
+                        </div>
+                        <div class="form-group-premium">
+                            <label>Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="loginPassword" placeholder="••••••••" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-luxury">Login Now</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sidebar-nav" class="sidebar hidden">
+        <div class="user-profile">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User">
+            <span class="user-name" id="role-text">User</span>
+        </div>
+        <ul>
+            <li><a href="javascript:void(0)" onclick="showSection('dashboard')"><i class="fa-solid fa-house"></i><span class="text">Dashboard</span></a></li>
+            <li><a href="javascript:openCashEntry()"><i class="fas fa-file-alt"></i><span class="text">Manage cash entry</span></a></li>
+            <li><a href="javascript:void(0)" onclick="showSection('budget-page')"><i class="fas fa-wallet"></i> <span class="text">Manage Budget</span> </a></li>
+            <li><a href="javascript:void(0)" onclick="showSection('report-page')"><i class="fas fa-paper-plane"></i><span class="text" id="report-link-text">Reports</span></a></li>
+            <li><a href="javascript:void(0)" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span class="text">Logout</span></a></li>
+        </ul>
+    </div>
+
+    <div id="dashboard-section" class="hidden">
+             
+   <div id="report-page" class="page-section">
+            <div class="report-container" id="report-content-area">
+                </div>
+        </div>
+        
+        <div id="dashboard" class="page-section active-section">
+            <header class="dash-header">
+                <h1 id="dash-title">Business Dashboard</h1>
+                <p id="user-display">Logged in as Administrator</p>
+            </header>
+            <div class="card-grid">
+                <div class="summary-card dark-espresso" id="balance-card"><h4>Current Balance</h4><p id="card-remaining">$0</p></div>
+                <div class="summary-card caramel-brown"><h4>Total Expenses</h4><p id="card-total">$0</p></div>
+                <div class="summary-card mocha-light"><h4>Total Income</h4><p id="card-income">$0</p></div>
+                <div class="summary-card mocha-light"><h4>Budget</h4><p id="total-budgeted">$0</p></div>
+                
+            </div>
+            <div class="table-container">
+                <h3>Recent Activity</h3>
+                <table>
+                    <thead><tr><th>Description</th><th>Category</th><th>Date</th><th>Amount</th></tr></thead>
+                    <tbody id="expense-rows"></tbody>
+                </table>
+            </div>
+        </div>
+<!--expense removed-->
+<!--income removed-->
+
+        <div id="budget-page" class="page-section">
+            
+            <iframe id="budget-iframe" src="budget_section.html" title="Budget Section" style="width:100%; height:1100px; border:0;"></iframe>
+        </div>
+        </div>
+
+        
+ 
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="newscript.js?v=4"></script>
+    <script src="budget.js?v=4"></script>
+    <script src="company_budget.js?v=4"></script>
+    <script>
+    // Show total budgeted amount in dashboard for admin only
+    async function updateDashboardBudgetCard() {
+        // Always show the budgeted amount for all roles (admin and sale)
+      
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const monthStr = `${y}-${m}`;
+        try {
+            // Fetch overall budgets for the current month (admin overall budgets)
+            const response = await fetch(`http://127.0.0.1:8000/api/overall_budgets?month=${monthStr}`);
+            let totalBudgeted = 0;
+            if (response.ok) {
+                const budgets = await response.json();
+                // overall_budgets may return one or more rows; sum their amounts
+                totalBudgeted = budgets.reduce((s, b) => s + parseFloat(b.amount || 0), 0);
+            }
+            document.getElementById('total-budgeted').innerText = `$ ${totalBudgeted.toLocaleString()}`;
+        } catch (e) {
+            console.error('Failed to load overall budgets for KPI:', e);
+            document.getElementById('total-budgeted').innerText = 'N/A';
+        }
+}
+
+    
+    // Call on page load for dashboard section
+    window.addEventListener('DOMContentLoaded', updateDashboardBudgetCard);
+
+    // Ensure dashboard budget card updates when dashboard section is shown
+    function showSection(sectionId) {
+        // Hide all page sections
+        document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active-section'));
+        // Show the requested section
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.classList.add('active-section');
+            // If dashboard is shown, update the budget card
+            if (sectionId === 'dashboard') {
+                updateDashboardBudgetCard();
+            }
+        }
+    }
+    </script>
+    <script>
+    // Select correct budget page based on saved role
+    (function(){
+        try {
+            const iframe = document.getElementById('budget-iframe');
+            if (!iframe) return;
+            const role = (localStorage.getItem('coffee_user_role') || '').toLowerCase();
+            if (role === 'sale') iframe.src = 'budget_section_sale.html';
+            else iframe.src = 'budget_section.html';
+        } catch(e){ console.error('Failed to set budget iframe based on role', e); }
+    })();
+    </script>
+    <script>
+    function openCashEntry() {
+        const role = localStorage.getItem('coffee_user_role') || 'sale';
+        const origin = window.location.origin;
+        window.location.href = `http://127.0.0.1:5003/?role=${role}&origin=${encodeURIComponent(origin)}`;
+    }
+
+    function logout() {
+        localStorage.removeItem('coffee_user_role');
+        window.location.href = '/';
+    }
+
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('action') === 'logout') {
+            logout();
+        } else if (window.location.hash) {
+            // Ensure section is shown if hash exists (fallback for race conditions)
+            const section = window.location.hash.substring(1);
+            if (typeof showSection === 'function') {
+                setTimeout(() => {
+                    showSection(section);
+                    if (section === 'dashboard') updateDashboardBudgetCard();
+                }, 100);
+            }
+        }
+
+        // Attach login form handler to update dashboard after login
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                setTimeout(() => {
+                    // After login, when dashboard is shown, update the budget card
+                    if (document.getElementById('dashboard').classList.contains('active-section')) {
+                        updateDashboardBudgetCard();
+                    }
+                }, 500);
+            });
+        }
+    };
+</script>
+
+</body>
+</html>
+
