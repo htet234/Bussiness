@@ -574,8 +574,18 @@
             }
         }
 
-        // 3) Variance
+       /* // 3) Variance
         const variance = totalBudgeted - actualSpent;
+        const percent = totalBudgeted ? (variance / totalBudgeted) * 100 : 0;
+        const absVar = Math.abs(variance);
+        const status = variance >= 0 ? 'Under Budget' : 'Over Budget';
+        const sign = variance >= 0 ? '' : '-';
+        elVar.innerHTML = `${sign}$ ${absVar.toLocaleString()} <div style="font-size:0.9rem; color:#666; margin-top:6px;">(${Math.abs(percent).toFixed(1)}% ${status})</div>`;
+    }*/
+        // 3) Variance: include labor cost in actuals (COGS + OPEX + Labor)
+        // determine labor total (prefer the payroll breakdown, fall back to admin sum)
+        const laborTotal = (showValue !== null && !isNaN(showValue)) ? parseFloat(showValue) : (laborCost || 0);
+        const variance = totalBudgeted - (actualSpent + laborTotal);
         const percent = totalBudgeted ? (variance / totalBudgeted) * 100 : 0;
         const absVar = Math.abs(variance);
         const status = variance >= 0 ? 'Under Budget' : 'Over Budget';
