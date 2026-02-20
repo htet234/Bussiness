@@ -468,7 +468,7 @@
                 const cogs = parseFloat(breakdown.cogs || 0);
                 const operating = parseFloat(breakdown.operating || 0);
                 laborCost = parseFloat(breakdown.payroll || 0);
-                actualSpent = cogs + operating;
+                actualSpent = cogs + operating + labor_cost_sum;
             }
         } catch (e) { console.error('Failed to load financial summary:', e); }
 

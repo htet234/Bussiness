@@ -357,7 +357,7 @@
             </div>
         </div>
         <div class="summary-card kpi-card">
-            <h4>Total Actual Spent(COGS + OPEX)</h4>
+            <h4>Total Actual Spent</h4>
             <div class="kpi-value">
                 <span id="total-actual-spent">$ 0</span>
                 <div id="labor-cost-info" style="font-size:1rem; color:#affbff; margin-top:6px; font-weight:500;"></div>
@@ -528,10 +528,9 @@
         } catch (e) { console.error('Failed to load overall budgets for KPI:', e); }
         elBudgeted.innerText = `$ ${totalBudgeted.toLocaleString()}`;
 
-        // 2) Total Actual Spent (use financial-summary breakdown for month)
-        let actualSpent = 0;
-        let laborCost = 0;
-        let latestLaborCost = null;
+        // 2) Total Actual Spent (COGS + Operating + Payroll)
+        let actualBase = 0; // cogs + operating
+        let payrollFromSummary = 0;
         try {
             const sumRes = await fetch(`${API_BASE}/api/financial-summary?start_date=${start}&end_date=${end}`);
             if (sumRes.ok) {
@@ -539,53 +538,43 @@
                 const breakdown = data.breakdown || {};
                 const cogs = parseFloat(breakdown.cogs || 0);
                 const operating = parseFloat(breakdown.operating || 0);
-                laborCost = parseFloat(breakdown.payroll || 0);
-                actualSpent = cogs + operating;
+                payrollFromSummary = parseFloat(breakdown.payroll || 0);
+                actualBase = (cogs || 0) + (operating || 0);
             }
         } catch (e) { console.error('Failed to load financial summary:', e); }
 
-        // Fetch sum of labor cost entries from admin for the selected month onlyz
+        // Fetch admin sum of labor cost as a fallback if payroll is not provided in financial-summary
         let laborCostSum = null;
         try {
             const sumLaborRes = await fetch(`${API_BASE}/api/sum-labor-cost?month=${month}`);
             if (sumLaborRes.ok) {
                 const sumLaborData = await sumLaborRes.json();
-                if (sumLaborData.labor_cost_sum !== null && !isNaN(sumLaborData.labor_cost_sum)) {
+                if (sumLaborData && sumLaborData.labor_cost_sum != null && !isNaN(sumLaborData.labor_cost_sum)) {
                     laborCostSum = parseFloat(sumLaborData.labor_cost_sum);
                 }
             }
         } catch (e) { console.error('Failed to load sum labor cost:', e); }
 
-        // Prefer laborCost (payroll sum for month) if available, else admin sum for this month
-        let showValue = null;
-        if (laborCost !== 0) {
-            showValue = laborCost;
-        } else if (laborCostSum !== null && laborCostSum !== 0) {
-            showValue = laborCostSum;
-        }
+        // Decide which payroll value to use: prefer payrollFromSummary if > 0, else laborCostSum
+        const payroll = (payrollFromSummary && payrollFromSummary > 0) ? payrollFromSummary : (laborCostSum || 0);
 
-        elActual.innerText = `$ ${actualSpent.toLocaleString()}`;
+        // Total actual spent includes payroll
+        const actualSpentTotal = Math.round(((actualBase || 0) + (payroll || 0)) * 100) / 100;
+        elActual.innerText = `$ ${actualSpentTotal.toLocaleString()}`;
+
+        // Show payroll info when available (indicate source)
         const laborInfo = document.getElementById('labor-cost-info');
         if (laborInfo) {
-            if (showValue !== null) {
-                laborInfo.innerText = `Labor Cost: $ ${showValue.toLocaleString()}`;
+            if (payroll > 0) {
+                const src = (payrollFromSummary && payrollFromSummary > 0) ? 'summary' : 'summary';
+                laborInfo.innerText = `Labor Cost (${src}): $ ${payroll.toLocaleString()}`;
             } else {
                 laborInfo.innerText = '';
             }
         }
 
-       /* // 3) Variance
-        const variance = totalBudgeted - actualSpent;
-        const percent = totalBudgeted ? (variance / totalBudgeted) * 100 : 0;
-        const absVar = Math.abs(variance);
-        const status = variance >= 0 ? 'Under Budget' : 'Over Budget';
-        const sign = variance >= 0 ? '' : '-';
-        elVar.innerHTML = `${sign}$ ${absVar.toLocaleString()} <div style="font-size:0.9rem; color:#666; margin-top:6px;">(${Math.abs(percent).toFixed(1)}% ${status})</div>`;
-    }*/
-        // 3) Variance: include labor cost in actuals (COGS + OPEX + Labor)
-        // determine labor total (prefer the payroll breakdown, fall back to admin sum)
-        const laborTotal = (showValue !== null && !isNaN(showValue)) ? parseFloat(showValue) : (laborCost || 0);
-        const variance = totalBudgeted - (actualSpent + laborTotal);
+        // 3) Variance: include payroll in actuals
+        const variance = totalBudgeted - actualSpentTotal;
         const percent = totalBudgeted ? (variance / totalBudgeted) * 100 : 0;
         const absVar = Math.abs(variance);
         const status = variance >= 0 ? 'Under Budget' : 'Over Budget';

@@ -65,53 +65,54 @@ def get_income_progress(start_date: date = Query(...), end_date: date = Query(..
 @app.get("/api/financial-summary")
 def get_financial_summary(start_date: date = Query(...), end_date: date = Query(...)):
     query = text("""
-        SELECT 
-            -- 1. Total Sales
-            (SELECT COALESCE(SUM(amount), 0) 
-             FROM checking_account_main 
-             WHERE UPPER(category) = 'SALES REVENUE' AND date BETWEEN :start AND :end) AS sales,
-            
-            -- 2. Individual Category Breakdowns
-            (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
-                SELECT amount FROM checking_account_main WHERE UPPER(category) = 'COGS' AND date BETWEEN :start AND :end
-                UNION ALL
-                SELECT amount FROM credit_card_account WHERE UPPER(category) = 'COGS' AND date BETWEEN :start AND :end
-             ) as cogs_sum) AS cat_cogs,
+    SELECT 
+        -- 1. Total Sales
+        (SELECT COALESCE(SUM(amount), 0) 
+         FROM checking_account_main 
+         WHERE UPPER(category) = 'SALES REVENUE' AND date BETWEEN :start AND :end) AS sales,
+        
+        -- 2. Individual Category Breakdowns
+        (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
+            SELECT amount FROM checking_account_main WHERE UPPER(category) = 'COGS' AND date BETWEEN :start AND :end
+            UNION ALL
+            SELECT amount FROM credit_card_account WHERE UPPER(category) = 'COGS' AND date BETWEEN :start AND :end
+         ) as cogs_sum) AS cat_cogs,
 
-            (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
-                SELECT amount FROM checking_account_main WHERE UPPER(category) = 'MARKETING' AND date BETWEEN :start AND :end
-                UNION ALL
-                SELECT amount FROM credit_card_account WHERE UPPER(category) = 'MARKETING' AND date BETWEEN :start AND :end
-            ) as m_sum) AS cat_marketing,
+        (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
+            SELECT amount FROM checking_account_main WHERE UPPER(category) = 'MARKETING' AND date BETWEEN :start AND :end
+            UNION ALL
+            SELECT amount FROM credit_card_account WHERE UPPER(category) = 'MARKETING' AND date BETWEEN :start AND :end
+        ) as m_sum) AS cat_marketing,
 
-            (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
-                SELECT amount FROM checking_account_main WHERE UPPER(category) = 'SUPPLIES' AND date BETWEEN :start AND :end
-                UNION ALL
-                SELECT amount FROM credit_card_account WHERE UPPER(category) = 'SUPPLIES' AND date BETWEEN :start AND :end
-            ) as s_sum) AS cat_supplies,
+        (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
+            SELECT amount FROM checking_account_main WHERE UPPER(category) = 'SUPPLIES' AND date BETWEEN :start AND :end
+            UNION ALL
+            SELECT amount FROM credit_card_account WHERE UPPER(category) = 'SUPPLIES' AND date BETWEEN :start AND :end
+        ) as s_sum) AS cat_supplies,
 
-            (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
-                SELECT amount FROM checking_account_main WHERE UPPER(category) = 'UTILITIES' AND date BETWEEN :start AND :end
-                UNION ALL
-                SELECT amount FROM credit_card_account WHERE UPPER(category) = 'UTILITIES' AND date BETWEEN :start AND :end
-            ) as u_sum) AS cat_utilities,
+        (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
+            SELECT amount FROM checking_account_main WHERE UPPER(category) = 'UTILITIES' AND date BETWEEN :start AND :end
+            UNION ALL
+            SELECT amount FROM credit_card_account WHERE UPPER(category) = 'UTILITIES' AND date BETWEEN :start AND :end
+        ) as u_sum) AS cat_utilities,
 
-            (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
-                SELECT amount FROM checking_account_main WHERE UPPER(category) = 'OTHER' AND date BETWEEN :start AND :end
-                UNION ALL
-                SELECT amount FROM credit_card_account WHERE UPPER(category) = 'OTHER' AND date BETWEEN :start AND :end
-            ) as o_sum) AS cat_other,
+        (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
+            SELECT amount FROM checking_account_main WHERE UPPER(category) = 'OTHER' AND date BETWEEN :start AND :end
+            UNION ALL
+            SELECT amount FROM credit_card_account WHERE UPPER(category) = 'OTHER' AND date BETWEEN :start AND :end
+        ) as o_sum) AS cat_other,
 
-            (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
-                SELECT amount FROM checking_account_main WHERE UPPER(category) = 'OPERATING EXPENSE' AND date BETWEEN :start AND :end
-                UNION ALL
-                SELECT amount FROM credit_card_account WHERE UPPER(category) = 'OPERATING EXPENSE' AND date BETWEEN :start AND :end
-            ) as oe_sum) AS cat_operating,
-            
-            -- 3. Total Payroll
-            (SELECT COALESCE(SUM(net_pay), 0) FROM payroll_history WHERE pay_date BETWEEN :start AND :end) AS total_payroll
-    """)
-    
+        (SELECT COALESCE(SUM(ABS(amount)), 0) FROM (
+            SELECT amount FROM checking_account_main WHERE UPPER(category) = 'OPERATING EXPENSE' AND date BETWEEN :start AND :end
+            UNION ALL
+            SELECT amount FROM credit_card_account WHERE UPPER(category) = 'OPERATING EXPENSE' AND date BETWEEN :start AND :end
+        ) as oe_sum) AS cat_operating,
+        
+        -- 3. Total Payroll (UPDATED: Using total_business_cost instead of net_pay)
+        (SELECT COALESCE(SUM(total_business_cost), 0) 
+         FROM payroll_history 
+         WHERE pay_date BETWEEN :start AND :end) AS total_payroll
+""")
     with engine.connect() as conn:
         row = conn.execute(query, {"start": start_date, "end": end_date}).mappings().one()
 
